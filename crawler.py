@@ -1,3 +1,4 @@
+from parser import parse_main_page
 import requests
 from bs4 import BeautifulSoup
 from typing import Union
