@@ -23,3 +23,15 @@ def parse_main_page(page: str) -> Generator[dict, None, None]:
             salary = salary_tag.text.strip()
         short_description = job_item.find('div', class_='_9jGwm1').text.strip()
         yield create_item_main_page(job_name, job_url, salary, short_description)
+
+
+def parse_salary(raw_salary: str) -> Optional[float]:
+    if not isinstance(raw_salary, str):
+        return
+    stripped_salary = raw_salary.strip('$ € грн $/год. .')
+    splitted_salary = stripped_salary.split('-')
+    replaced_salary = splitted_salary[0].replace(' ', '')
+    if replaced_salary[0].isdigit():
+        return float(replaced_salary)
+    print('wrong salary data')
+    return

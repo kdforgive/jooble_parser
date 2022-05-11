@@ -57,8 +57,10 @@ def crawl_subpage():
 
 
 def handler():
-    pass
-
+    page_amount = None
+    current_page = 1
+    first_page_raw = crawl_main_page(current_page)
+    main_page_items_gen = parse_main_page(first_page_raw)
 
 def write_item_to_json():
     pass
