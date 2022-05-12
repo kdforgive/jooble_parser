@@ -35,3 +35,18 @@ def parse_salary(raw_salary: str) -> Optional[float]:
         return float(replaced_salary)
     print('wrong salary data')
     return
+
+
+def create_item_main_page():
+    pass
+
+
+def parse_subpage(page: str, item: dict):
+    soup = BeautifulSoup(page, 'lxml')
+    full_description_raw = soup.find_all('div', class_='_1yTVFy')
+    full_description = ' '.join(full_description_raw[1].text.split())
+    return subpage_update_item(item, full_description)
+
+
+def subpage_update_item(item: dict, full_description: str) -> dict:
+    pass
