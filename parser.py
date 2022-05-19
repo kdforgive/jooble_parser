@@ -57,8 +57,15 @@ def parse_salary(raw_salary: str) -> Optional[float]:
     return
 
 
-def create_item_main_page():
-    pass
+def create_item_main_page(job_name: str, job_url: str, salary: str, short_description: str):
+    if not isinstance(job_url, str) or not job_url:
+        return {}
+    item = create_empty_item()
+    item['job_url'] = job_url
+    item['job_name'] = job_name if isinstance(job_url, str) else ''
+    item['short_description'] = short_description if isinstance(short_description, str) else ''
+    item['salary'] = parse_salary(salary) if parse_salary(salary) is not None else ''
+    return item
 
 
 def parse_subpage(page: str, item: dict):
@@ -69,3 +76,13 @@ def parse_subpage(page: str, item: dict):
 
 def subpage_update_item(item: dict, full_description: str) -> dict:
     pass
+
+
+def create_empty_item():
+    return {
+        'main_job_name': '',
+        'job_url': '',
+        'salary': '',
+        'short_description': '',
+        'description': ''
+    }
