@@ -1,4 +1,4 @@
-from parser import parse_main_page
+from parser import parse_main_page, parse_pages_amount, parse_subpage
 import requests
 from bs4 import BeautifulSoup
 from typing import Union
@@ -52,8 +52,9 @@ def crawl_main_page(page_number: int = 1):
     return resp.text
 
 
-def crawl_subpage():
-    pass
+def crawl_subpage(url: str):
+    resp = requests.get(url=url)
+    return resp.text
 
 
 def handler():

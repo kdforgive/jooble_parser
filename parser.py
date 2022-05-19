@@ -23,7 +23,7 @@ def soup_find_exception_checker(tag_element, tag, element, method, find_all=None
         elif method == 'get':
             return souper.get('href')
     else:
-        return ''
+        return '---'
 
 
 def count_pages_amount(vacancy_amount: int, items_per_page: int = 20):
