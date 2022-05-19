@@ -75,7 +75,8 @@ def parse_subpage(page: str, item: dict):
 
 
 def subpage_update_item(item: dict, full_description: str) -> dict:
-    pass
+    item['description'] = full_description
+    return item
 
 
 def create_empty_item():
