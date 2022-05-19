@@ -26,8 +26,11 @@ def soup_find_exception_checker(tag_element, tag, element, method, find_all=None
         return ''
 
 
-def count_pages_amount(items_amount: int, items_per_page: int = 20):
-    pass
+def count_pages_amount(vacancy_amount: int, items_per_page: int = 20):
+    pages_amount = vacancy_amount // items_per_page + 1 \
+        if vacancy_amount % items_per_page != 0 \
+        else vacancy_amount // items_per_page
+    return pages_amount
 
 
 def parse_pages_amount(page):
