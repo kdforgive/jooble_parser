@@ -6,7 +6,8 @@ soup_class_dict = {'job_name': '_3862j6',
                    'job_url': '_15V35X',
                    'salary_tag': 'jNebTl',
                    'short_description': '_9jGwm1',
-                   'full_description_raw': '_1yTVFy'}
+                   'full_description_raw': '_1yTVFy',
+                   'vacancy_amount': '_22VJWN'}
 
 
 def soup_find_exception_checker(tag_element, tag, element, method, find_all=None):
@@ -25,12 +26,18 @@ def soup_find_exception_checker(tag_element, tag, element, method, find_all=None
         return ''
 
 
-def count_pages_amount():
+def count_pages_amount(items_amount: int, items_per_page: int = 20):
     pass
 
 
-def parse_pages_amount():
-    pass
+def parse_pages_amount(page):
+    soup = BeautifulSoup(page, 'lxml')
+    vacancy_amount_raw = soup_find_exception_checker(soup, 'div', {'class': soup_class_dict['vacancy_amount']}, 'text')
+    vacancy_amount = ''
+    for char in vacancy_amount_raw:
+        if char.isdigit():
+            vacancy_amount += char
+    return count_pages_amount(int(vacancy_amount))
 
 
 def parse_main_page(page: str) -> Generator[dict, None, None]:
