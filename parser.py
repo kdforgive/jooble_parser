@@ -1,5 +1,28 @@
 from bs4 import BeautifulSoup
+import bs4
 from typing import Generator, Union, Optional, List
+
+soup_class_dict = {'job_name': '_3862j6',
+                   'job_url': '_15V35X',
+                   'salary_tag': 'jNebTl',
+                   'short_description': '_9jGwm1',
+                   'full_description_raw': '_1yTVFy'}
+
+
+def soup_find_exception_checker(tag_element, tag, element, method, find_all=None):
+    if find_all == 'find_all':
+        souper = tag_element.find_all(tag, element)
+        if souper is not None:
+            return ' '.join(souper[1].text.split())
+
+    souper = tag_element.find(tag, element)
+    if souper is not None:
+        if method == 'text':
+            return souper.text
+        elif method == 'get':
+            return souper.get('href')
+    else:
+        return ''
 
 
 def count_pages_amount():
@@ -15,14 +38,11 @@ def parse_main_page(page: str) -> Generator[dict, None, None]:
     jobs_items = soup.find_all('article', class_='FxQpvm yKsady')
 
     for job_item in jobs_items:
-        job_name = job_item.find('span', class_='_3862j6').find('span').text.strip()
-        job_url = job_item.find('div', class_='_15V35X').find('a').get('href')
-        salary_tag = job_item.find('p', class_='jNebTl')
-        salary = None
-        if salary_tag is not None:
-            salary = salary_tag.text.strip()
-        short_description = job_item.find('div', class_='_9jGwm1').text.strip()
-        yield create_item_main_page(job_name, job_url, salary, short_description)
+        job_name = soup_find_exception_checker(job_item, 'span', {'class': soup_class_dict['job_name']}, 'text')
+        job_url = soup_find_exception_checker(job_item, 'a', {'rel': soup_class_dict['job_url']}, 'get')
+        salary_tag = soup_find_exception_checker(job_item, 'p', {'class': soup_class_dict['salary_tag']}, 'text')
+        short_description = soup_find_exception_checker(job_item, 'div', {'class': soup_class_dict['short_description']}, 'text')
+        yield create_item_main_page(job_name, job_url, salary_tag, short_description)
 
 
 def parse_salary(raw_salary: str) -> Optional[float]:
@@ -35,3 +55,17 @@ def parse_salary(raw_salary: str) -> Optional[float]:
         return float(replaced_salary)
     print('wrong salary data')
     return
+
+
+def create_item_main_page():
+    pass
+
+
+def parse_subpage(page: str, item: dict):
+    soup = BeautifulSoup(page, 'lxml')
+    full_description = soup_find_exception_checker(soup, 'div', {'class': soup_class_dict['full_description_raw']}, 'text', 'find_all')
+    return subpage_update_item(item, full_description)
+
+
+def subpage_update_item(item: dict, full_description: str) -> dict:
+    pass
