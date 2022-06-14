@@ -1,5 +1,7 @@
 from parser import parse_main_page, parse_pages_amount, parse_subpage
 import requests
+from requests_html import HTMLSession
+import json
 from bs4 import BeautifulSoup
 from typing import Union
 
@@ -47,29 +49,49 @@ def generate_url(date: int = None, employment_type: int = 0, location: int = 0, 
 
 
 def crawl_main_page(page_number: int = 1):
-    main_page_url = generate_url(date=2, city='Київ', job='python программист')
+    main_page_url = generate_url(date=2, city='Київ', job='python программист', page=page_number)
     resp = requests.get(main_page_url, headers)
     return resp.text
 
 
 def crawl_subpage(url: str):
-    resp = requests.get(url=url)
+    session = HTMLSession()
+    resp = session.get(url=url)
     return resp.text
 
 
 def handler():
-    page_amount = None
+    pages_amount = None
     current_page = 1
-    first_page_raw = crawl_main_page(current_page)
-    main_page_items_gen = parse_main_page(first_page_raw)
+    while True:
+        first_page_raw = crawl_main_page(current_page)
+        if pages_amount is None:
+            pages_amount = parse_pages_amount(first_page_raw)
+        main_page_items_gen = parse_main_page(first_page_raw)
+        for item in main_page_items_gen:
+            item_subpage_raw = crawl_subpage(item.get('job_url'))
+            updated_item = parse_subpage(item_subpage_raw, item)
+            yield updated_item
+        if current_page >= pages_amount:
+            break
+        current_page += 1
 
-def write_item_to_json():
-    pass
+
+def write_item_to_json(item: dict, file_name: str = 'data.json') -> None:
+    with open(file_name, 'r', encoding="UTF-8") as r_file:
+        data = json.load(r_file)
+    data.append(item)
+    with open(file_name, 'w', encoding='UTF-8') as w_file:
+        json.dump(data, w_file, indent=4, ensure_ascii=False)
 
 
 def main():
-    pass
+    counter = 1
+    for item in handler():
+        write_item_to_json(item)
+        print(f'item #{counter}')
+        counter += 1
 
 
 if __name__ == '__main__':
-    pass
+    main()
