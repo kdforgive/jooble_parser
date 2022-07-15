@@ -1,5 +1,4 @@
 from parser_ import ParserJooble
-# from parser_ import parse_main_page, parse_pages_amount, parse_subpage
 import requests
 from requests_html import HTMLSession
 import json
@@ -64,12 +63,15 @@ class CrawlerJooble:
         return url
 
     def crawl_main_page(self):
+        # temporary solution for parser to work
         session = HTMLSession()
-        url = 'https://ua.jooble.org/SearchResult?rgns=%D0%9A%D0%B8%D1%97%D0%B2&ukw=%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%81%D1%82%20python'
+        url = 'https://ua.jooble.org/SearchResult?rgns=%D0%9A%D0%B8%D1%97%D0%B2&ukw=' \
+              '%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%81%D1%82%20python'
         resp = requests.get(url, self.headers())
         return resp.text
 
-    def crawl_subpage(self, url: str):
+    @staticmethod
+    def crawl_subpage(url: str):
         resp = requests.get(url=url)
         return resp.text
 
@@ -81,6 +83,7 @@ class CrawlerJooble:
                 pages_amount = ParserJooble().parse_pages_amount(first_page_raw)
             main_page_items_gen = ParserJooble().parse_main_page(first_page_raw)
             for item in main_page_items_gen:
+                print(item)
                 item_subpage_raw = self.crawl_subpage(item.get('job_url'))
                 updated_item = ParserJooble().parse_subpage(item_subpage_raw, item)
                 yield updated_item
@@ -89,7 +92,8 @@ class CrawlerJooble:
             self._current_page += 1
             print('---------------', self._current_page)
 
-    def write_item_to_json(self, item: dict, file_name: str = 'data.json') -> None:
+    @staticmethod
+    def write_item_to_json(item: dict, file_name: str = 'data.json') -> None:
         with open(file_name, 'r', encoding="UTF-8") as r_file:
             data = json.load(r_file)
         data.append(item)

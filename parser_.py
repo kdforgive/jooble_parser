@@ -4,7 +4,7 @@ from typing import Generator, Optional
 
 class Item:
     """fields for item representation,
-    method for (create_empty_item) dict construct"""
+     method for (create_empty_item) dict construct"""
     def __init__(self):
         self.job_name = ''
         self.job_url = ''
@@ -23,7 +23,7 @@ class Item:
 
 
 class SoupFieldIds:
-    # create class SoupFieldsIds, class_attr = keys
+    """create class SoupFieldsIds, class_attr = keys"""
     job_name = '_3862j6'
     job_url = 'noopener nofollow'
     salary_tag = 'jNebTl'
@@ -33,15 +33,6 @@ class SoupFieldIds:
 
 
 class ParserJooble:
-    def __init__(self):
-        self.soup_class_dict = {
-            'job_name': '_3862j6',
-            'job_url': 'noopener nofollow',
-            'salary_tag': 'jNebTl',
-            'short_description': '_9jGwm1',
-            'full_description_raw': '_1yTVFy',
-            'vacancy_amount': '_22VJWN',
-        }
 
     @staticmethod
     def soup_find_exception_checker(tag_element, tag, element, method, find_all=None):
@@ -68,10 +59,9 @@ class ParserJooble:
 
     def parse_pages_amount(self, page):
         soup = BeautifulSoup(page, 'lxml')
-        x = soup.text
-        vacancy_amount_raw = self.soup_find_exception_checker(soup, 'div', {'class': SoupFieldIds.vacancy_amount}, 'text')  # SoupFieldIds.vacancy_amount
-        # vacancy_amount_raw = self.soup_find_exception_checker(soup, 'div', {'class': self.soup_class_dict['vacancy_amount']}, 'text')
-        print('++++++++++++++++', vacancy_amount_raw)
+        # SoupFieldIds.vacancy_amount
+        vacancy_amount_raw = self.soup_find_exception_checker(soup, 'div',
+                                                              {'class': SoupFieldIds.vacancy_amount}, 'text')
         vacancy_amount = ''
         for char in vacancy_amount_raw:
             if char.isdigit():
@@ -82,10 +72,11 @@ class ParserJooble:
         soup = BeautifulSoup(page, 'lxml')
         jobs_items = soup.find_all('article', class_='FxQpvm yKsady')
         for job_item in jobs_items:
-            job_name = self.soup_find_exception_checker(job_item, 'span', {'class': self.soup_class_dict['job_name']}, 'text')
-            job_url = self.soup_find_exception_checker(job_item, 'a', {'rel': self.soup_class_dict['job_url']}, 'get')
-            salary_tag = self.soup_find_exception_checker(job_item, 'p', {'class': self.soup_class_dict['salary_tag']}, 'text')
-            short_description = self.soup_find_exception_checker(job_item, 'div', {'class': self.soup_class_dict['short_description']}, 'text')
+            job_name = self.soup_find_exception_checker(job_item, 'span', {'class': SoupFieldIds.job_name}, 'text')
+            job_url = self.soup_find_exception_checker(job_item, 'a', {'rel': SoupFieldIds.job_url}, 'get')
+            salary_tag = self.soup_find_exception_checker(job_item, 'p', {'class': SoupFieldIds.salary_tag}, 'text')
+            short_description = self.soup_find_exception_checker(job_item, 'div',
+                                                                 {'class': SoupFieldIds.short_description}, 'text')
             yield self.create_item_main_page(job_name, job_url, salary_tag, short_description)
 
     def parse_salary(self, raw_salary: str) -> Optional[float]:
@@ -108,24 +99,17 @@ class ParserJooble:
         item.job_name = job_name if isinstance(job_url, str) else ''
         item.short_description = short_description if isinstance(short_description, str) else ''
         item.salary = self.parse_salary(salary) if self.parse_salary(salary) is not None else ''
-        return item.add_items_to_dict()  # item.to_dict -- method or @property to create dictionary from this item
+        return item.add_items_to_dict()  # item.to_dict - method or @property to create dictionary from this item
 
     def parse_subpage(self, page: str, item: dict):
         soup = BeautifulSoup(page, 'lxml')
+        # to see captcha request on subpage
         print(soup.text)
-        full_description = self.soup_find_exception_checker(soup, 'div', {'class': self.soup_class_dict['full_description_raw']}, 'text', 'find_all')
+        full_description = self.soup_find_exception_checker(soup, 'div', {'class': SoupFieldIds.full_description_raw},
+                                                            'text', 'find_all')
         return self.subpage_update_item(item, full_description)
 
-    def subpage_update_item(self, item: dict, full_description: str) -> dict:
+    @staticmethod
+    def subpage_update_item(item: dict, full_description: str):
         item['description'] = full_description
         return item
-
-    # @staticmethod
-    # def create_empty_item():
-    #     return {
-    #         'job_name': '',
-    #         'job_url': '',
-    #         'salary': '',
-    #         'short_description': '',
-    #         'description': ''
-    #     }
