@@ -1,17 +1,39 @@
 from bs4 import BeautifulSoup
-import bs4
-from typing import Generator, Union, Optional, List
+from typing import Generator, Optional
+
+
+class Item:
+    """fields for item representation,
+    method for (create_empty_item) dict construct"""
+    def __init__(self):
+        self.job_name = ''
+        self.job_url = ''
+        self.salary = ''
+        self.short_description = ''
+        self.description = ''
+
+    def add_items_to_dict(self):
+        return {
+            'job_name': self.job_name,
+            'job_url': self.job_url,
+            'salary': self.salary,
+            'short_description': self.short_description,
+            'description': self.description,
+        }
+
+
+class SoupFieldIds:
+    # create class SoupFieldsIds, class_attr = keys
+    job_name = '_3862j6'
+    job_url = 'noopener nofollow'
+    salary_tag = 'jNebTl'
+    short_description = '_9jGwm1'
+    full_description_raw = '_1yTVFy'
+    vacancy_amount = '_22VJWN'
 
 
 class ParserJooble:
     def __init__(self):
-        self.create_empty_item = {
-            'job_name': '',
-            'job_url': '',
-            'salary': '',
-            'short_description': '',
-            'description': '',
-        }
         self.soup_class_dict = {
             'job_name': '_3862j6',
             'job_url': 'noopener nofollow',
@@ -21,7 +43,8 @@ class ParserJooble:
             'vacancy_amount': '_22VJWN',
         }
 
-    def soup_find_exception_checker(self, tag_element, tag, element, method, find_all=None):
+    @staticmethod
+    def soup_find_exception_checker(tag_element, tag, element, method, find_all=None):
         if find_all == 'find_all':
             souper = tag_element.find_all(tag, element)
             if souper is not None:
@@ -36,7 +59,8 @@ class ParserJooble:
         else:
             return ''
 
-    def count_pages_amount(self, vacancy_amount: int, items_per_page: int = 20):
+    @staticmethod
+    def count_pages_amount(vacancy_amount: int, items_per_page: int = 20):
         pages_amount = vacancy_amount // items_per_page + 1 \
             if vacancy_amount % items_per_page != 0 \
             else vacancy_amount // items_per_page
@@ -44,7 +68,10 @@ class ParserJooble:
 
     def parse_pages_amount(self, page):
         soup = BeautifulSoup(page, 'lxml')
-        vacancy_amount_raw = self.soup_find_exception_checker(soup, 'div', {'class': self.soup_class_dict['vacancy_amount']}, 'text')
+        x = soup.text
+        vacancy_amount_raw = self.soup_find_exception_checker(soup, 'div', {'class': SoupFieldIds.vacancy_amount}, 'text')  # SoupFieldIds.vacancy_amount
+        # vacancy_amount_raw = self.soup_find_exception_checker(soup, 'div', {'class': self.soup_class_dict['vacancy_amount']}, 'text')
+        print('++++++++++++++++', vacancy_amount_raw)
         vacancy_amount = ''
         for char in vacancy_amount_raw:
             if char.isdigit():
@@ -73,15 +100,15 @@ class ParserJooble:
         # print('wrong salary data')
         # return
 
-    def create_item_main_page(self, job_name: str, job_url: str, salary: str, short_description: str):
+    def create_item_main_page(self, job_name: str, job_url: str, salary: str, short_description: str) -> dict:
         if not isinstance(job_url, str) or not job_url:
             return {}
-        item = self.create_empty_item
-        item['job_url'] = job_url
-        item['job_name'] = job_name if isinstance(job_url, str) else ''
-        item['short_description'] = short_description if isinstance(short_description, str) else ''
-        item['salary'] = self.parse_salary(salary) if self.parse_salary(salary) is not None else ''
-        return item
+        item = Item()  # Item() - create instance
+        item.job_url = job_url
+        item.job_name = job_name if isinstance(job_url, str) else ''
+        item.short_description = short_description if isinstance(short_description, str) else ''
+        item.salary = self.parse_salary(salary) if self.parse_salary(salary) is not None else ''
+        return item.add_items_to_dict()  # item.to_dict -- method or @property to create dictionary from this item
 
     def parse_subpage(self, page: str, item: dict):
         soup = BeautifulSoup(page, 'lxml')
@@ -93,7 +120,8 @@ class ParserJooble:
         item['description'] = full_description
         return item
 
-    # def create_empty_item(self):
+    # @staticmethod
+    # def create_empty_item():
     #     return {
     #         'job_name': '',
     #         'job_url': '',
